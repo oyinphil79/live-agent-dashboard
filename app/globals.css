@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --color-page: #faf8f4;
+  --color-ink: #17171a;
+  --color-ink-2: #55555c;
+  --color-ink-3: #8b8b93;
+  --color-line: #ecebe6;
+  --color-good: #2f9e6b;
+  --color-bad: #d9483b;
+  --color-warn: #d98b3b;
+}
+
+body {
+  background: var(--color-page);
+  color: var(--color-ink);
+}
+
+.glow {
+  background:
+    radial-gradient(40rem 18rem at 22% -4rem, rgb(178 230 196 / 0.55), transparent 70%),
+    radial-gradient(38rem 18rem at 78% -5rem, rgb(255 205 170 / 0.55), transparent 70%);
+}
+
+.card {
+  background: white;
+  border-radius: 1.25rem;
+  box-shadow: 0 1px 2px rgb(23 23 26 / 0.04), 0 8px 24px -12px rgb(23 23 26 / 0.12);
+}
