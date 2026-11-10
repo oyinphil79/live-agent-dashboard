@@ -2,7 +2,7 @@
 
 I want to build a small Next.js app called "Live Agent Dashboard". Clients always ask "how will we know if the agent breaks at 2 am?", and I want a live answer: send real traffic to a tool-using agent, trace every run in Langfuse, break one of its tools on purpose, and watch an alert fire when a tool call keeps failing, then clear when it's fixed.
 
-Use Next.js (App Router) with TypeScript and Tailwind, call OpenAI with the official `openai` SDK (Responses API with function tools), and trace with the `langfuse` JS SDK. No database and no login.
+Use Next.js (App Router) with TypeScript and Tailwind, call OpenAI with the official `openai` SDK (Responses API with function tools), and trace with the Langfuse TypeScript SDK v6 (`@langfuse/tracing` + `@langfuse/otel`). No database and no login.
 
 Here's how it should work:
 
@@ -22,7 +22,13 @@ Here's how it should work:
    - whether the run itself failed, with the error message;
    - the Langfuse trace ID and a link to the trace.
 
-4. **Langfuse tracing.** Each run is one Langfuse trace (name `shopnow-support`, the customer message as input, the final reply as output, session ID per dashboard session). Each model call is a `generation` with the model, token usage and cost, and each tool call is a `span` with its arguments, result, and `level: "ERROR"` plus a status message when it fails. Flush before the route returns, and never let a Langfuse error break a run.
+4. **Langfuse tracing.** Follow the Langfuse best practices. Each run is one trace named `shopnow-support`:
+   - The root is an `agent` observation, `handle-support-message`, with the customer message as input and the reply as output.
+   - Every model call is its own `generation`, `generate-response`. Record the full input the model saw, its reasoning summary and output, the model, exclusive usage buckets (input, cached, output, reasoning) and cost.
+   - Every tool call is a `tool` observation named after the tool, with its arguments and result, and `level: "ERROR"` when it fails.
+   - Group traces into one session per dashboard tab, tag them `synthetic-traffic` plus `incident:<name>`, set the agent version, and use a dedicated `live-agent-dashboard` environment.
+   - Mask emails and phone numbers.
+   - Users bring their own keys, so route each request to its own project ("project per request"), flush before returning, and never let a Langfuse error break a run.
 
 5. **Incidents.** Four real incidents you can switch on while traffic flows:
    - **Order service down:** `track_order` throws `503 upstream timeout` on every call. The agent still answers (it apologises), so the run looks fine on its own. This is the silent failure the tool rule exists to catch.

@@ -1,3 +1,6 @@
+/** Bump when the prompt, tools or loop change, so traces can be compared across versions. */
+export const AGENT_VERSION = "shopnow-agent-1";
+
 export const SYSTEM_PROMPT = `You are the customer support agent for ShopNow, an online store in India.
 Be brief and friendly: two or three sentences.
 Facts:

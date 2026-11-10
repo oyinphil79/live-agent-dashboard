@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
+import { type LangfuseCredentials, projectUrl, withLangfuseProject } from "@/lib/langfuse";
 import { runAgent } from "@/lib/openai";
-import { Tracer } from "@/lib/tracing";
 import type { Incidents } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -29,28 +29,23 @@ export async function POST(req: Request) {
   };
   const sessionId = typeof body.sessionId === "string" ? body.sessionId.slice(0, 64) : "dashboard";
 
-  const tracer = new Tracer(
-    {
-      publicKey: req.headers.get("x-langfuse-public-key")?.trim(),
-      secretKey: req.headers.get("x-langfuse-secret-key")?.trim(),
-      host: safeHost(req.headers.get("x-langfuse-host")),
-    },
-    "shopnow-support",
-    sessionId,
-    message,
-  );
+  const publicKey = req.headers.get("x-langfuse-public-key")?.trim();
+  const secretKey = req.headers.get("x-langfuse-secret-key")?.trim();
+  const baseUrl = safeHost(req.headers.get("x-langfuse-host")) ?? "https://cloud.langfuse.com";
+  const credentials: LangfuseCredentials | null = publicKey && secretKey ? { publicKey, secretKey, baseUrl } : null;
+  const project = credentials ? projectUrl(credentials) : Promise.resolve(undefined); // resolved alongside the run
 
   const t0 = Date.now();
-  const run = await runAgent(apiKey, message, incidents, tracer);
+  const run = await withLangfuseProject(credentials, () => runAgent(apiKey, message, incidents, sessionId));
   const ms = Date.now() - t0;
-  await tracer.finish(run.error ? { error: run.error } : run.reply, run.error);
+  const base = await project;
 
   return NextResponse.json({
     ...run,
     ms,
     ok: !run.error,
-    traceId: tracer.id,
-    traceUrl: tracer.url,
+    traceId: credentials ? run.traceId : undefined,
+    traceUrl: base && run.traceId ? `${base}/traces/${run.traceId}` : undefined,
   });
 }
 
