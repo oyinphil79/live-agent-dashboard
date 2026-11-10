@@ -26,7 +26,7 @@ Here's how it should work:
 
 5. **Incidents.** Four real incidents you can switch on while traffic flows:
    - **Order service down:** `track_order` throws `503 upstream timeout` on every call. The agent still answers (it apologises), so the run looks fine on its own. This is the silent failure the tool rule exists to catch.
-   - **Slow courier API:** `delivery_estimate` waits 4 seconds before answering.
+   - **Slow tool APIs:** the order, returns and courier APIs each take 3 seconds to answer.
    - **Huge prompt:** a generated product catalog of about 120 lines appended to the agent's prompt.
    - **Revoked API key:** a fake OpenAI key, so every run really fails.
 
@@ -34,7 +34,7 @@ Here's how it should work:
    - **Tool failures (the headline rule):** tracked per tool. It fires when a tool fails in 3 calls in a row, and clears when at most 1 of that tool's last 3 calls failed. The alert names the tool, quotes the latest error, says how many runs were affected, and links to the latest failing Langfuse trace.
    - **Cost per run** (default 3× normal, since reply length alone moves it a lot) and **reply time** (1.5× normal) fire only when 3 runs in a row cross the line, and clear when at most 1 of the last 3 does. Real traffic is noisy and one odd reply shouldn't page anyone.
    - **Run errors:** fires when 2 of the last 3 runs fail.
-   - Each alert says what changed and the likely cause, by comparing input, output and reasoning tokens and per-tool durations with normal. For example: "input tokens 9× normal, so the prompt grew", or "delivery_estimate takes 4.1 s against 0.2 s normally".
+   - Each alert says what changed and the likely cause, by comparing input, output and reasoning tokens and per-tool durations with normal. For example: "input tokens 9× normal, so the prompt grew", or "track_order takes 3.1 s against 0.2 s normally".
 
 7. **Slack.** An optional incoming webhook: `POST /api/slack` posts each alert there (FIRING and RESOLVED, with the Langfuse trace link), and only accepts `https://hooks.slack.com/services/` URLs.
 

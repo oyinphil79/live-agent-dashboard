@@ -1,0 +1,28 @@
+{
+  "name": "live-agent-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "geist": "1.9.2",
+    "langfuse": "3.39.2",
+    "lucide-react": "1.71.0",
+    "next": "16.4.6",
+    "openai": "7.55.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.5",
+    "@types/node": "22.15.30",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "tailwindcss": "4.3.5",
+    "typescript": "5.9.3"
+  }
+}
